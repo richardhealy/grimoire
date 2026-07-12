@@ -1,0 +1,91 @@
+id: xara_nightwhisper
+canon_version: 4
+display_name: Xara Nightwhisper
+
+visual:
+  invariants:
+    - silver-white hair, undercut on the left side, chin length
+    - vertical scar through the right eyebrow
+    - heterochromia: left eye grey, right eye near-black
+    - matte black leather half-cloak, hood down by default
+    - single obsidian teardrop pendant, always visible
+    - lean build, 5'6", moves like she is about to leave
+
+  descriptor_block: >
+    Xara Nightwhisper: a lean human woman in her late twenties, silver-white
+    chin-length hair with a shaved left undercut, a vertical scar through her
+    right eyebrow, grey left eye and near-black right eye, wearing a matte
+    black leather half-cloak over dark grey travel leathers, an obsidian
+    teardrop pendant at her throat.
+
+  negative_block: >
+    no blue eyes, no long hair, no symmetrical haircut, no armour plate,
+    no jewellery other than the pendant, no hood raised unless specified,
+    no glowing effects on the eyes
+
+  palette:
+    hair: "#E8E4DA"
+    cloak: "#141416"
+    leathers: "#2E3033"
+    pendant: "#0B0B0F"
+    skin: "#D9BFA9"
+
+  refs:
+    canonical:
+      - refs/xara/front_neutral.png
+      - refs/xara/three_quarter.png
+      - refs/xara/profile.png
+      - refs/xara/full_body.png
+    expressions:
+      - refs/xara/expr_wry.png
+      - refs/xara/expr_fury.png
+    detail:
+      - refs/xara/detail_pendant.png
+      - refs/xara/detail_scar.png
+
+  wardrobe_states:
+    - id: default
+      refs:
+        - refs/xara/front_neutral.png
+    - id: hood_up
+      refs:
+        - refs/xara/hood_up.png
+    - id: ballroom
+      refs:
+        - refs/xara/ballroom.png
+      note: only valid in Act 2, arc "The Velvet Court"
+
+voice:
+  register: dry, clipped, deflects with wit when frightened
+  cadence: short sentences. Rarely more than twelve words. Trails off rather than concluding.
+  lexicon_yes:
+    - shadow
+    - debt
+    - worth it
+    - listen
+    - don't
+  lexicon_no:
+    - amazing
+    - journey
+    - honestly
+    - I feel like
+    - absolutely
+  tics:
+    - answers questions with questions when cornered
+    - never uses the party's names in a crisis, only "you"
+  never_says:
+    - anything sincere about her own feelings without being forced to
+    - a straight apology
+  gold_lines:
+    - "Don't. Whatever it is, don't."
+    - "It was worth it. Ask me again tomorrow."
+    - "You want a plan or you want it done?"
+    - "I've been in worse rooms."
+
+behaviour:
+  wants: to be believed, once, by someone who knows what she did
+  fears: being seen clearly
+  under_pressure: goes quiet and moves first
+  relationships:
+    kellan: trusts him, will not admit it
+    the_dark_lady: obedience laced with terror

@@ -1,0 +1,25 @@
+style_id: sharran_noir
+canon_version: 2
+
+style_block: >
+  European graphic-novel style, heavy ink linework with a confident brush
+  weight, limited flat colour palette with hard-edged shadows, muted desaturated
+  base with a single high-chroma accent per panel, dramatic chiaroscuro,
+  no rendered gradients, no photorealism, no digital painterly blending,
+  visible cross-hatching in the shadow masses.
+
+negative_block: >
+  no 3D render look, no anime, no cel shading gloss, no lens flare,
+  no watermark, no text, no speech bubbles, no panel borders
+
+palette_accent_rules:
+  - one accent hue per scene, set by the scene's emotional register
+
+style_refs:
+  - refs/style/style_plate_01.png
+  - refs/style/style_plate_02.png
+
+render_config:
+  model: gemini-3.1-flash-image
+  resolution: 4K
+  thinking: high

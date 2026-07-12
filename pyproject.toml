@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grimoire"
+version = "0.1.0"
+description = "Character-locked comic generator: versioned bible, deterministic prompt compiler, drift gate, SVG layout, vector lettering"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
