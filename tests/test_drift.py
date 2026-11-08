@@ -104,3 +104,45 @@ def test_accumulate_failures_updates_negative_block():
     updated = accumulate_failures(report, {char.id: char})
     # RETRY does not accumulate (only ESCALATE with human confirmation does)
     assert char.id not in updated   # not updated on RETRY
+
+
+def _wrap_all_pass(char: CharacterRecord, template: str):
+    body = json.dumps({
+        "invariant_checks": all_pass_checks(char),
+        "style_adherence": 8.0,
+        "text_contamination": False,
+    }, indent=2)
+    reply = template.format(body=body)
+    return lambda system, user: reply
+
+
+@pytest.mark.parametrize("template", [
+    "```JSON\n{body}\n```",
+    "Here is my assessment of the panel:\n\n```json\n{body}\n```",
+    "Assessment follows.\n{body}\nThat is all.",
+], ids=["JSON-fence", "prose-before-fence", "prose-no-fence"])
+def test_wrapped_judge_reply_is_read(template):
+    # On main these replies were thrown away as parse errors, so a clean panel
+    # was re-rendered and finally escalated.
+    char = CharacterRecord.from_yaml(BIBLE_PATH)
+    client = _wrap_all_pass(char, template)
+    report = asyncio.run(judge_panel("p01_01", "panel.png", [char], attempt=1, llm_client=client))
+    char_report = report.character_reports[0]
+    assert report.gate_decision == "PASS"
+    assert all(c.verdict == "PASS" for c in char_report.invariant_checks)
+    assert char_report.style_adherence == 8.0
+
+
+@pytest.mark.parametrize("reply", ["[]", '[{"invariant": "x", "verdict": "PASS"}]'])
+def test_non_object_judge_reply_is_a_parse_error(reply):
+    # On main a JSON list crashed judge_panel with AttributeError.
+    char = CharacterRecord.from_yaml(BIBLE_PATH)
+    report = asyncio.run(judge_panel(
+        "p01_01", "panel.png", [char], attempt=1, llm_client=lambda s, u: reply
+    ))
+    char_report = report.character_reports[0]
+    assert report.gate_decision == "RETRY"
+    assert all(c.verdict == "UNCLEAR" for c in char_report.invariant_checks)
+    assert all(c.note == "judge_parse_error" for c in char_report.invariant_checks)
+    assert char_report.style_adherence == 5.0
+    assert char_report.text_contamination is False

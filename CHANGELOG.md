@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-09
+
+### Fixed
+
+- The drift judge (stage 9) and the voice judge (stage 5) no longer throw
+  away a good verdict because of how the model wrapped its JSON. Both used
+  `.lstrip("```json")`, which strips any of the characters `` ` ``, `j`,
+  `s`, `o` and `n` rather than the fence, so only a bare object or one
+  fenced exactly as ```` ```json ```` was read. A reply fenced as
+  ```` ```JSON ````, or with a sentence before or after the JSON, became
+  `judge_parse_error`: every invariant UNCLEAR and a re-render for the drift
+  gate, a failed line for the voice lock.
+- A judge reply that is a JSON list no longer crashes `judge_panel` or
+  `judge_line` with `AttributeError`; it is treated as a parse error.
+
+### Added
+
+- `grimoire/llm_reply.py`: `parse_json_object()` takes the JSON object out
+  of a judge reply. It looks inside the first Markdown code fence first,
+  then in the whole reply, and raises `ValueError` when there is no object.
+- Tests for the parser and for wrapped and non-object replies in both
+  judges (`tests/test_llm_reply.py`, `tests/test_drift.py`,
+  `tests/test_voice.py`).
+
 ## 2026-10-06
 
 ### Fixed

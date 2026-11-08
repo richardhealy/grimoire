@@ -30,15 +30,32 @@ library function.
   named `grimoire`. PyYAML is declared as a dependency, with `llm` and
   `gemini` extras for the live paths. 3 packaging tests added (70 in total).
 
+- 2026-11-09: the drift judge and the voice judge now read their JSON reply
+  through `grimoire/llm_reply.py`. Before, both used
+  `.lstrip("```json")`, which strips a set of characters rather than a
+  prefix, so a reply fenced as ```` ```JSON ````, or with a sentence before
+  the JSON, was thrown away as `judge_parse_error`: the drift gate sent a
+  clean panel back for re-render (and escalated it after three tries) and
+  the voice lock failed a good line. A JSON list as the reply crashed both
+  with `AttributeError`; it is now a parse error. 30 tests added (100 in
+  total).
+
 ## Known issues
 
 - No README. The repo has no description of what it is, how to install it or
   how to run the tests.
 - No CI workflow.
-- `ruff check .` reports 60 findings, all from before this change: mostly
-  unused imports and import order, plus `.lstrip("```json")` in
-  `drift/gate.py` and `script/voice.py` (it strips a set of characters, not
-  the prefix) and unused variables in three tests.
+- `ruff check .` reports 54 findings, all from before 2026-11-09: mostly
+  unused imports and import order, plus unused variables in three tests.
+  There is no ruff config in the repo, so the rule set comes from the
+  machine running it.
+- Drift gate: the pass rate is worked out over the invariants the judge
+  reported, not the character's own list. A reply that checks one of
+  Xara's six invariants, as PASS, passes the panel. Invariants the judge
+  leaves out should count as UNCLEAR.
+- Drift gate: a reply whose `style_adherence` is not a number (`"7/10"`)
+  crashes `judge_panel` with `ValueError`, and so does an
+  `invariant_checks` entry that is not an object (`AttributeError`).
 - `.gitignore` ignores `*.pdf`, so a dossier PDF under `docs/dossier/` will
   need an exception.
 - The Notion page names `gemini-3.1-flash-image` as the target renderer; the
