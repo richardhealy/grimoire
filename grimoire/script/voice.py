@@ -14,10 +14,10 @@ Critical detail from spec §6:
 """
 from __future__ import annotations
 import asyncio
-import json
 from dataclasses import dataclass
 from typing import Any
 from grimoire.bible.character import CharacterRecord, VoiceCard
+from grimoire.llm_reply import parse_json_object
 
 
 @dataclass
@@ -129,8 +129,7 @@ Score this line. Does it sound like {character.display_name} and nobody else?"""
     raw = await _call_llm(llm_client, JUDGE_SYSTEM, prompt)
 
     try:
-        clean = raw.strip().lstrip("```json").rstrip("```").strip()
-        data = json.loads(clean)
+        data = parse_json_object(raw)
         return VoiceJudgement(
             passed=data.get("verdict", "FAIL") == "PASS",
             score=float(data.get("score", 0.0)),
@@ -138,7 +137,8 @@ Score this line. Does it sound like {character.display_name} and nobody else?"""
             could_belong_to=data.get("could_belong_to_others", []),
             rewritten_line=line,
         )
-    except (json.JSONDecodeError, ValueError):
+    except ValueError:
+        # No JSON object in the reply, or a score that is not a number
         return VoiceJudgement(
             passed=False, score=0.0,
             violations=["judge_parse_error"],

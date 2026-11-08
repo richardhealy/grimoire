@@ -131,3 +131,35 @@ def test_lock_dialogue_malformed_judge_response():
         lock_dialogue("test", char, [char], llm_client=client)
     )
     assert "judge_parse_error" in judgement.violations
+
+
+@pytest.mark.parametrize("template", [
+    "```JSON\n{body}\n```",
+    "Here is my verdict:\n\n```json\n{body}\n```",
+    "Verdict follows.\n{body}\nThat is all.",
+], ids=["JSON-fence", "prose-before-fence", "prose-no-fence"])
+def test_wrapped_judge_reply_is_read(template):
+    # On main these replies were thrown away as parse errors, so a good line
+    # failed the voice lock.
+    char = CharacterRecord.from_yaml(BIBLE_PATH)
+    body = json.dumps({
+        "score": 0.95, "violations": [], "could_belong_to_others": [], "verdict": "PASS",
+    }, indent=2)
+    reply = template.format(body=body)
+    judgement = asyncio.run(
+        judge_line("I've been in worse rooms.", char, [char], llm_client=lambda s, u: reply)
+    )
+    assert judgement.passed is True
+    assert judgement.score == 0.95
+    assert judgement.violations == []
+
+
+@pytest.mark.parametrize("reply", ["[]", '["PASS"]'])
+def test_non_object_judge_reply_is_a_parse_error(reply):
+    # On main a JSON list crashed judge_line with AttributeError.
+    char = CharacterRecord.from_yaml(BIBLE_PATH)
+    judgement = asyncio.run(
+        judge_line("I've been in worse rooms.", char, [char], llm_client=lambda s, u: reply)
+    )
+    assert judgement.passed is False
+    assert judgement.violations == ["judge_parse_error"]

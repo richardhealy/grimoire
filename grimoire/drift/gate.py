@@ -22,11 +22,11 @@ headline metric. Track it per issue.
 """
 from __future__ import annotations
 import asyncio
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Literal, Optional
 from grimoire.bible.character import CharacterRecord
+from grimoire.llm_reply import parse_json_object
 
 
 Verdict = Literal["PASS", "FAIL", "UNCLEAR"]
@@ -156,8 +156,7 @@ Check each invariant against what is visible in the panel."""
     raw = await _call_llm(llm_client, DRIFT_JUDGE_SYSTEM, prompt)
 
     try:
-        clean = raw.strip().lstrip("```json").rstrip("```").strip()
-        data = json.loads(clean)
+        data = parse_json_object(raw)
         checks_raw = data.get("invariant_checks", [])
         checks = [
             InvariantCheck(
@@ -167,15 +166,16 @@ Check each invariant against what is visible in the panel."""
             )
             for c in checks_raw
         ]
-    except (json.JSONDecodeError, ValueError):
-        # Parse failure: treat as UNCLEAR for all invariants
+    except ValueError:
+        # No JSON object in the reply: treat as UNCLEAR for all invariants
+        data = {}
         checks = [
             InvariantCheck(invariant=inv, verdict="UNCLEAR", note="judge_parse_error")
             for inv in character.visual.invariants
         ]
 
-    style_adherence = float(data.get("style_adherence", 5.0)) if 'data' in dir() else 5.0
-    text_contamination = bool(data.get("text_contamination", False)) if 'data' in dir() else False
+    style_adherence = float(data.get("style_adherence", 5.0))
+    text_contamination = bool(data.get("text_contamination", False))
 
     # ── Routing decision ──────────────────────────────────────────────────────
     total = len(checks)
