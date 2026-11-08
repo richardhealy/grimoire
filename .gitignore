@@ -7,3 +7,10 @@ renders/
 output/
 *.png
 *.pdf
+.ruff_cache/
+.DS_Store
+dist/
+
+# Tooling and scratch files
+.claude/
+CLAUDE.md

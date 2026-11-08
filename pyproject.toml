@@ -7,6 +7,13 @@ name = "grimoire"
 version = "0.1.0"
 description = "Character-locked comic generator: versioned bible, deterministic prompt compiler, drift gate, SVG layout, vector lettering"
 requires-python = ">=3.12"
+dependencies = ["pyyaml>=6.0"]
+
+[project.optional-dependencies]
+# Live voice rewriting, voice judging and drift checks (tests use fake clients)
+llm = ["anthropic>=0.40"]
+# Live image rendering; without it the stub renderer writes placeholder PNGs
+gemini = ["google-generativeai>=0.8"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
